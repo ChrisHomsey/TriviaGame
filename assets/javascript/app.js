@@ -1,5 +1,7 @@
 $( document ).ready(function() {
 	
+	
+	// Create an array of objects that will hold the question, choice, and answer data of each trivia question.
 	var triviaQuestions = [
 		{
 			question: "Of Pink Floyd's four most popular albums, which one came out first ?",
@@ -42,7 +44,8 @@ $( document ).ready(function() {
 			choices: ["Kiss", "Pink Floyd", "Rush", "AC/DC"],
 			answer: 2 },
 	];
-
+	
+	// Initialize game variables
 	var score;
 	var incorrect;
 	var unanswered;
@@ -52,27 +55,32 @@ $( document ).ready(function() {
 	var currentQuestion;
 
 
-
+	// triviaTimer is an object with methods that control the game timer.
 	var triviaTimer = {
 
 		remaining: 20,
-
+		
+		// Method to start the clock- the counter is restarted each time the question 
 		start: function(q, a){
 			
 			triviaTimer.remaining = 20;
 			$('#time-remaining').text(triviaTimer.remaining);
 			currentQuestion = q;
 			currentAnswer = a;
-			if (clockRunning == false) {     
+			if (clockRunning === false) {     
 				triviaInterval = setInterval(triviaTimer.count, 1000 );
 				clockRunning = true;
 			}
 		},
-
+		
+		// Every second, count() is run. Time remaining is decreased by one
 		count: function(){
 			triviaTimer.remaining--;
+			
+			// The displayed timer is updated. 
 			$('#time-remaining').text(triviaTimer.remaining);
 			
+			// If time runs out, checkAnswer() is run with a null value for the user's answer.
 			if (triviaTimer.remaining == 0) {
 				checkAnswer(null, currentAnswer, currentQuestion);
 			}
@@ -83,7 +91,8 @@ $( document ).ready(function() {
 		}
 
 	}
-
+	
+	// Starts a new game, reinitializes all variables.
 	var newGame = function() {
 		score = 0;
 		incorrect = 0;
@@ -95,17 +104,21 @@ $( document ).ready(function() {
 		nextQuestion(0);
 	}
 
-
+	// Function that changes the current question. 
 	var nextQuestion = function(q){
 		choiceSelected = null;
+		
+		// If the game is still in progress, display the next question and choices.
 		if (q < triviaQuestions.length) {
 			$('#game-area').html('<h4>Time Remaining: <span id="time-remaining"></span></h4><br /><h3>' + triviaQuestions[q].question + '</h3><ol class="choice-list"></ol>');
 			for (var i = 0; i < triviaQuestions[q].choices.length; i++) {
 				$('.choice-list').append('<li class="choices" data-value="' + i + '">' + triviaQuestions[q].choices[i] + '</li>');
 			}
-
+			
+			// Starts the timer for the current question
 			triviaTimer.start(q, triviaQuestions[q].answer);
-
+			
+			// jQuery - if a choice is clicked, capture the data selected and then run the checkAnswer function
 			$('.choices').click(function(){
 				choiceSelected = $(this).attr('data-value');
 				console.log(choiceSelected);
@@ -114,6 +127,7 @@ $( document ).ready(function() {
 
 			})
 		} else {
+			// If all questions have been guessed, stop the timer and then display the score.
 			triviaTimer.stop();
 			$('#game-area').html('<h3>All Done! Here\'s how you did.</h3><p>Correct Answers:' + score + '</p><p>Incorrect Answers: ' + incorrect + '</p><p>Unanswered: ' + unanswered + '</p><button class="start btn-lg center-block">Start Over</button>');
 			$('.start').click(function(){
@@ -123,6 +137,9 @@ $( document ).ready(function() {
 
 	}
 
+	// This function takes 3 properties- the user's answer, the correct answer, and the current question.
+	// It compares the user's answer (or lack of answer) and the real answer and distributes points accordingly.
+	// After two seconds, the nextQuestion function is run to keep the game moving.
 	var checkAnswer = function(check, ans, questionNum) {
 		if (check == ans) {
 			score++;
@@ -142,7 +159,7 @@ $( document ).ready(function() {
 		}
 	}
 
-
+	// If the start button is clicked, start a new game!
 	$('.start').click(function() {
 		newGame();
 	})
